@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 import { adminTokenStore } from "@/lib/api";
 
 const nav = [
-  { href: "/dashboard",          label: "Хянах самбар", icon: "◈" },
-  { href: "/dashboard/users",    label: "Хэрэглэгчид",  icon: "◉" },
-  { href: "/dashboard/payments", label: "Төлбөрүүд",    icon: "✦" },
-  { href: "/dashboard/settings", label: "Тохиргоо",     icon: "⚙" },
+  { href: "/dashboard",               label: "Хянах самбар", icon: "◈" },
+  { href: "/dashboard/users",         label: "Хэрэглэгчид",  icon: "◉" },
+  { href: "/dashboard/subscriptions", label: "Захиалгууд",   icon: "★" },
+  { href: "/dashboard/payments",      label: "Төлбөрүүд",    icon: "✦" },
+  { href: "/dashboard/settings",      label: "Тохиргоо",     icon: "⚙" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
