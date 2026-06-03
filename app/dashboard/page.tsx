@@ -9,17 +9,19 @@ interface Stats {
   totalPayments: number;
   paidPayments: number;
   totalRevenue: number;
-  usage: { analyze: number; outfit: number; hairstyle: number };
+  usage: Record<string, number>;
   subscriptions: { basic: number; pro: number };
   mrr: number;
 }
 
 const CARD = "bg-white/[0.04] border border-white/[0.07] rounded-2xl p-6";
 
-const FEATURE_LABELS: Record<string, { label: string; icon: string; color: string }> = {
-  analyze:   { label: "Нүүрний шинжилгээ", icon: "◈", color: "text-purple-400" },
-  outfit:    { label: "Хувцас генератор",  icon: "◉", color: "text-blue-400"   },
-  hairstyle: { label: "Үс / Грим",         icon: "✦", color: "text-pink-400"   },
+const FEATURE_LABELS: Record<string, { label: string; icon: string; color: string; bar: string }> = {
+  full:      { label: "Бүрэн шинжилгээ",   icon: "✦", color: "text-purple-400", bar: "bg-purple-500" },
+  // legacy keys kept for historical data display
+  analyze:   { label: "Нүүрний шинжилгээ", icon: "◈", color: "text-purple-400", bar: "bg-purple-500" },
+  outfit:    { label: "Хувцас генератор",  icon: "◉", color: "text-blue-400",   bar: "bg-blue-500"   },
+  hairstyle: { label: "Үс / Грим",         icon: "✦", color: "text-pink-400",   bar: "bg-pink-500"   },
 };
 
 export default function DashboardPage() {
@@ -74,17 +76,21 @@ export default function DashboardPage() {
         <div className={CARD}>
           <h2 className="text-sm font-medium text-white/70 mb-5">Боломжийн хэрэглээ</h2>
           {isLoading
-            ? <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-8 bg-white/[0.06] rounded-xl animate-pulse" />)}</div>
+            ? <div className="space-y-3">{[...Array(2)].map((_, i) => <div key={i} className="h-8 bg-white/[0.06] rounded-xl animate-pulse" />)}</div>
+            : totalUsage === 0
+            ? <p className="text-sm text-white/30 py-4">Одоогоор хэрэглээ бүртгэгдээгүй байна</p>
             : (
               <div className="space-y-4">
-                {Object.entries(data?.usage ?? {}).map(([feature, count]) => {
+                {Object.entries(data?.usage ?? {})
+                  .filter(([, count]) => count > 0)   // hide zero-count features
+                  .map(([feature, count]) => {
                   const meta = FEATURE_LABELS[feature];
                   const pct  = totalUsage > 0 ? Math.round((count / totalUsage) * 100) : 0;
                   return (
                     <div key={feature}>
                       <div className="flex justify-between text-sm mb-1.5">
                         <span className={`flex items-center gap-2 ${meta?.color ?? "text-white/60"}`}>
-                          <span className="text-xs">{meta?.icon}</span>
+                          <span className="text-xs">{meta?.icon ?? "◉"}</span>
                           {meta?.label ?? feature}
                         </span>
                         <span className="text-white font-medium">
@@ -93,10 +99,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all ${
-                            feature === "analyze" ? "bg-purple-500" :
-                            feature === "outfit"  ? "bg-blue-500" : "bg-pink-500"
-                          }`}
+                          className={`h-full rounded-full transition-all ${meta?.bar ?? "bg-purple-500"}`}
                           style={{ width: `${pct}%` }}
                         />
                       </div>
