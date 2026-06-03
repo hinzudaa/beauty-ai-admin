@@ -38,7 +38,7 @@ export default function SubscriptionsPage() {
   const [planFilter, setPlanFilter] = useState<"" | "basic" | "pro">("");
 
   const url = `/admin/subscriptions?page=${page}&limit=20${planFilter ? `&plan=${planFilter}` : ""}`;
-  const { data, isLoading } = useSWR<Page>(url, adminFetcher);
+  const { data, isLoading, error } = useSWR<Page>(url, adminFetcher);
 
   return (
     <div>
@@ -120,7 +120,12 @@ export default function SubscriptionsPage() {
             </tbody>
           </table>
 
-          {!isLoading && (!data?.data.length) && (
+          {!isLoading && error && (
+            <p className="text-center text-red-400/70 text-sm py-12">
+              Backend холбогдсонгүй — сервер ажиллаж байгааг шалгана уу
+            </p>
+          )}
+          {!isLoading && !error && (!data?.data.length) && (
             <p className="text-center text-white/30 text-sm py-12">Идэвхтэй захиалга байхгүй байна</p>
           )}
         </div>
