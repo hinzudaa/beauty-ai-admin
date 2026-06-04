@@ -43,17 +43,22 @@ function PushToggle() {
 
   if (state === "unknown") return null;
 
+  const isGranted = state === "granted";
+
   return (
     <button
-      onClick={state === "granted" ? undefined : enable}
-      className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2 ${
-        state === "granted"
-          ? "text-purple-400/70 cursor-default"
-          : "text-white/40 hover:text-white/70 hover:bg-white/[0.04] cursor-pointer"
-      }`}
+      type="button"
+      onClick={isGranted ? undefined : enable}
+      disabled={isGranted}
+      className={`w-full text-left px-3 py-3 rounded-xl text-sm transition-all flex items-center gap-2 select-none
+        ${isGranted
+          ? "text-purple-400/70 opacity-70"
+          : "text-white/60 active:bg-white/[0.08] hover:bg-white/[0.04]"
+        }`}
+      style={{ WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
     >
-      <span>{state === "granted" ? "🔔" : "🔕"}</span>
-      {state === "granted" ? "Мэдэгдэл идэвхтэй" : "Мэдэгдэл идэвхжүүлэх"}
+      <span className="text-base">{isGranted ? "🔔" : "🔕"}</span>
+      {isGranted ? "Мэдэгдэл идэвхтэй" : "Мэдэгдэл идэвхжүүлэх"}
     </button>
   );
 }
