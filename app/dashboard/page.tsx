@@ -14,7 +14,7 @@ interface Stats {
   mrr: number;
 }
 
-const CARD = "bg-white/[0.04] border border-white/[0.07] rounded-2xl p-6";
+const CARD = "bg-white/[0.04] border border-white/[0.07] rounded-2xl p-4 sm:p-6";
 
 const FEATURE_LABELS: Record<string, { label: string; icon: string; color: string; bar: string }> = {
   full:      { label: "Бүрэн шинжилгээ",   icon: "✦", color: "text-purple-400", bar: "bg-purple-500" },
@@ -44,9 +44,9 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-5 sm:mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Хянах самбар</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold text-white">Хянах самбар</h1>
           <p className="text-sm text-white/40 mt-1">Beauty AI платформын тойм</p>
         </div>
         <Link href="/dashboard/settings"
@@ -56,7 +56,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Main stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
         {isLoading
           ? [...Array(8)].map((_, i) => <div key={i} className={`${CARD} animate-pulse h-[100px]`} />)
           : stats.map((s) => (
@@ -65,7 +65,7 @@ export default function DashboardPage() {
                 <span className={`text-sm ${s.color}`}>{s.icon}</span>
                 <p className="text-xs text-white/40 uppercase tracking-widest leading-tight">{s.label}</p>
               </div>
-              <p className="text-3xl font-semibold text-white">{s.value}</p>
+              <p className="text-2xl sm:text-3xl font-semibold text-white">{s.value}</p>
             </div>
           ))
         }

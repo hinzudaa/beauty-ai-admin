@@ -30,14 +30,14 @@ export default function UsersPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-5 sm:mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Хэрэглэгчид</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold text-white">Хэрэглэгчид</h1>
           <p className="text-sm text-white/40 mt-1">Нийт {data?.total ?? 0} хэрэглэгч</p>
         </div>
       </div>
 
-      <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl overflow-hidden">
+      <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl overflow-hidden"><div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-white/[0.07]">
@@ -70,7 +70,7 @@ export default function UsersPage() {
               ))
             }
           </tbody>
-        </table>
+        </table></div>
 
         {data && data.pages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-white/[0.07]">

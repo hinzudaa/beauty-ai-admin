@@ -22,7 +22,7 @@ interface Page {
   pages: number;
 }
 
-const CARD = "bg-white/[0.04] border border-white/[0.07] rounded-2xl p-6";
+const CARD = "bg-white/[0.04] border border-white/[0.07] rounded-2xl p-4 sm:p-6";
 
 const PLAN_COLOR: Record<string, string> = {
   basic: "text-blue-400 bg-blue-400/10 border-blue-400/20",
@@ -42,9 +42,9 @@ export default function SubscriptionsPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
+      <div className="mb-5 sm:mb-8 flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Захиалгууд</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold text-white">Захиалгууд</h1>
           <p className="text-sm text-white/40 mt-1">
             {isLoading ? "..." : `Нийт ${data?.total ?? 0} идэвхтэй захиалга`}
           </p>
@@ -119,16 +119,16 @@ export default function SubscriptionsPage() {
               }
             </tbody>
           </table>
-
-          {!isLoading && error && (
-            <p className="text-center text-red-400/70 text-sm py-12">
-              Backend холбогдсонгүй — сервер ажиллаж байгааг шалгана уу
-            </p>
-          )}
-          {!isLoading && !error && (!data?.data.length) && (
-            <p className="text-center text-white/30 text-sm py-12">Идэвхтэй захиалга байхгүй байна</p>
-          )}
         </div>
+
+        {!isLoading && error && (
+          <p className="text-center text-red-400/70 text-sm py-12">
+            Backend холбогдсонгүй — сервер ажиллаж байгааг шалгана уу
+          </p>
+        )}
+        {!isLoading && !error && (!data?.data.length) && (
+          <p className="text-center text-white/30 text-sm py-12">Идэвхтэй захиалга байхгүй байна</p>
+        )}
 
         {/* Pagination */}
         {(data?.pages ?? 0) > 1 && (

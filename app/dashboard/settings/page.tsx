@@ -10,7 +10,7 @@ interface Settings {
   proPrice:      number;
 }
 
-const CARD = "bg-white/[0.04] border border-white/[0.07] rounded-2xl p-6";
+const CARD = "bg-white/[0.04] border border-white/[0.07] rounded-2xl p-4 sm:p-6";
 
 const PACKAGES = [
   {
@@ -85,7 +85,7 @@ export default function SettingsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Тохиргоо</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold text-white">Тохиргоо</h1>
         <p className="text-sm text-white/40 mt-1">Сарын захиалгын багцын QPay үнэ</p>
       </div>
 
