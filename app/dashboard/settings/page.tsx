@@ -25,7 +25,7 @@ const PACKAGES = [
     name:  "Standard",
     icon:  "◉",
     color: "text-gray-400",
-    desc:  "Сард 10 шинжилгээ · 3 AI Look зураг",
+    desc:  "Сард 10 шинжилгээ · 2 AI Look зураг",
     decoy: true,
   },
   {
@@ -33,7 +33,7 @@ const PACKAGES = [
     name:  "Pro",
     icon:  "★",
     color: "text-purple-400",
-    desc:  "Сард 20 шинжилгээ · 5 AI Look зураг · AI Стилист чат",
+    desc:  "Сард 10 шинжилгээ · 4 AI Look зураг · AI Стилист чат",
   },
 ] satisfies Array<{ key: PriceKey; name: string; icon: string; color: string; desc: string; decoy?: true }>;
 
