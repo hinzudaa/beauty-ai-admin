@@ -2,7 +2,61 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import { adminTokenStore } from "@/lib/api";
+
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+function PushToggle() {
+  const [state, setState] = useState<"unknown"|"granted"|"denied"|"default">("unknown");
+
+  useEffect(() => {
+    if (!("Notification" in window)) { setState("denied"); return; }
+    setState(Notification.permission as typeof state);
+  }, []);
+
+  async function enable() {
+    const reg  = await navigator.serviceWorker.ready;
+    const perm = await Notification.requestPermission();
+    setState(perm as typeof state);
+    if (perm !== "granted") return;
+
+    const token = adminTokenStore.get();
+    const r = await fetch(`${BASE}/admin/vapid-public-key`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const { publicKey } = await r.json() as { publicKey: string };
+
+    const padding = "=".repeat((4 - (publicKey.length % 4)) % 4);
+    const b64     = (publicKey + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const raw     = atob(b64);
+    const key     = new Uint8Array([...raw].map((c) => c.charCodeAt(0)));
+
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+    const json = sub.toJSON();
+    await fetch(`${BASE}/admin/push/subscribe`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
+    });
+  }
+
+  if (state === "unknown") return null;
+
+  return (
+    <button
+      onClick={state === "granted" ? undefined : enable}
+      className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2 ${
+        state === "granted"
+          ? "text-purple-400/70 cursor-default"
+          : "text-white/40 hover:text-white/70 hover:bg-white/[0.04] cursor-pointer"
+      }`}
+    >
+      <span>{state === "granted" ? "🔔" : "🔕"}</span>
+      {state === "granted" ? "Мэдэгдэл идэвхтэй" : "Мэдэгдэл идэвхжүүлэх"}
+    </button>
+  );
+}
 
 const nav = [
   { href: "/dashboard",               label: "Хянах самбар", icon: "◈" },
@@ -52,7 +106,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        <div className="px-3 pb-4">
+        <div className="px-3 pb-4 space-y-1">
+          <PushToggle />
           <button
             onClick={logout}
             className="w-full text-left px-3 py-2.5 rounded-xl text-sm text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all"

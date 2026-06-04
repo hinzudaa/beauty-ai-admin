@@ -35,7 +35,7 @@ const PACKAGES = [
     color: "text-purple-400",
     desc:  "Сард 20 шинжилгээ · 5 AI Look зураг · AI Стилист чат",
   },
-] as const;
+] satisfies Array<{ key: PriceKey; name: string; icon: string; color: string; desc: string; decoy?: true }>;
 
 type PriceKey = keyof Settings;
 
