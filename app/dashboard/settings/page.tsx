@@ -5,8 +5,9 @@ import useSWR from "swr";
 import { adminFetcher, request } from "@/lib/api";
 
 interface Settings {
-  basicPrice: number;
-  proPrice:   number;
+  basicPrice:    number;
+  standardPrice: number;
+  proPrice:      number;
 }
 
 const CARD = "bg-white/[0.04] border border-white/[0.07] rounded-2xl p-6";
@@ -17,16 +18,22 @@ const PACKAGES = [
     name:  "Basic",
     icon:  "◈",
     color: "text-blue-400",
-    limit: 20,
-    desc:  "Сард 20 шинжилгээ · Нүүр + Үс + Хувцас нэгэн зэрэг · Look татах",
+    desc:  "Сард 5 шинжилгээ · 2 AI Look зураг",
+  },
+  {
+    key:   "standardPrice" as const,
+    name:  "Standard",
+    icon:  "◉",
+    color: "text-gray-400",
+    desc:  "Сард 10 шинжилгээ · 3 AI Look зураг",
+    decoy: true,
   },
   {
     key:   "proPrice" as const,
     name:  "Pro",
     icon:  "★",
     color: "text-purple-400",
-    limit: 40,
-    desc:  "Сард 40 шинжилгээ · AI Personal Stylist Chat · Бүх Basic боломж",
+    desc:  "Сард 20 шинжилгээ · 5 AI Look зураг · AI Стилист чат",
   },
 ] as const;
 
@@ -35,9 +42,9 @@ type PriceKey = keyof Settings;
 export default function SettingsPage() {
   const { data, isLoading, mutate } = useSWR<Settings>("/admin/settings", adminFetcher);
 
-  const [prices, setPrices]   = useState<Partial<Record<PriceKey, string>>>({});
-  const [saving, setSaving]   = useState(false);
-  const [msg, setMsg]         = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [prices, setPrices] = useState<Partial<Record<PriceKey, string>>>({});
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg]       = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -83,15 +90,28 @@ export default function SettingsPage() {
       </div>
 
       <form onSubmit={handleSave} className="max-w-2xl space-y-4">
+
+        {/* Price info note */}
+        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3 text-xs text-yellow-400/80">
+          ★ Standard нь decoy pricing — Basic-аас бага зэрэг үнэтэй тул хэрэглэгчид Pro-г сонгоход урам өгдөг.
+        </div>
+
         {PACKAGES.map((pkg) => {
           const current = data?.[pkg.key];
           return (
-            <div key={pkg.key} className={CARD}>
+            <div key={pkg.key} className={`${CARD} ${pkg.decoy ? "border-white/[0.04]" : ""}`}>
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
                   <span className={`text-xl ${pkg.color}`}>{pkg.icon}</span>
                   <div>
-                    <p className="text-sm font-semibold text-white">{pkg.name} захиалга</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-white">{pkg.name} захиалга</p>
+                      {pkg.decoy && (
+                        <span className="text-[0.6rem] font-bold text-yellow-400/80 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-2 py-0.5">
+                          Decoy
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-white/30 mt-0.5">{pkg.desc}</p>
                   </div>
                 </div>
@@ -106,7 +126,7 @@ export default function SettingsPage() {
 
               <div className="flex gap-3">
                 <input
-                  type="number" min={100} step={100}
+                  type="number" min={100} step={1}
                   value={prices[pkg.key] ?? ""}
                   onChange={(e) => { setPrices((p) => ({ ...p, [pkg.key]: e.target.value })); setMsg(null); }}
                   placeholder={current?.toString() ?? "Шинэ үнэ"}
@@ -130,9 +150,10 @@ export default function SettingsPage() {
 
         <button type="submit" disabled={saving}
           className="w-full py-3 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-all">
-          {saving ? "Хадгалж байна..." : "Хадгалах"}
+          {saving ? "Хадгалж байна..." : "Бүгдийг хадгалах"}
         </button>
 
+        {/* Credential card */}
         <div className={CARD}>
           <h2 className="text-sm font-medium text-white/70 mb-4">Нэвтрэх мэдээлэл</h2>
           <div className="space-y-2">
