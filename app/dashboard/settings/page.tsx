@@ -8,6 +8,9 @@ interface Settings {
   basicPrice:    number;
   standardPrice: number;
   proPrice:      number;
+  basicLimit:    number;
+  standardLimit: number;
+  proLimit:      number;
 }
 
 const CARD = "bg-white/[0.04] border border-white/[0.07] rounded-2xl p-4 sm:p-6";
@@ -37,12 +40,19 @@ const PACKAGES = [
   },
 ] satisfies Array<{ key: PriceKey; name: string; icon: string; color: string; desc: string; decoy?: true }>;
 
-type PriceKey = keyof Settings;
+const LIMIT_PACKAGES = [
+  { key: "basicLimit"    as const, plan: "Basic",    color: "text-blue-400"   },
+  { key: "standardLimit" as const, plan: "Standard", color: "text-gray-400"   },
+  { key: "proLimit"      as const, plan: "Pro",      color: "text-purple-400" },
+] satisfies Array<{ key: LimitKey; plan: string; color: string }>;
+
+type PriceKey = "basicPrice" | "standardPrice" | "proPrice";
+type LimitKey = "basicLimit" | "standardLimit" | "proLimit";
 
 export default function SettingsPage() {
   const { data, isLoading, mutate } = useSWR<Settings>("/admin/settings", adminFetcher);
 
-  const [prices, setPrices] = useState<Partial<Record<PriceKey, string>>>({});
+  const [prices, setPrices] = useState<Partial<Record<PriceKey | LimitKey, string>>>({});
   const [saving, setSaving] = useState(false);
   const [msg, setMsg]       = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
@@ -50,15 +60,20 @@ export default function SettingsPage() {
     e.preventDefault();
     setMsg(null);
 
-    const updates: Partial<Record<PriceKey, number>> = {};
+    const limitKeys = ["basicLimit", "standardLimit", "proLimit"];
+    const updates: Partial<Record<PriceKey | LimitKey, number>> = {};
     for (const [k, v] of Object.entries(prices)) {
       if (!v) continue;
       const num = parseInt(v, 10);
-      if (isNaN(num) || num < 100) {
+      if (isNaN(num) || num < 1) {
+        setMsg({ type: "err", text: `${k}: 1-ээс их байх ёстой` });
+        return;
+      }
+      if (!limitKeys.includes(k) && num < 100) {
         setMsg({ type: "err", text: `${k}: хамгийн багадаа 100₮ байх ёстой` });
         return;
       }
-      updates[k as PriceKey] = num;
+      updates[k as PriceKey | LimitKey] = num;
     }
 
     if (!Object.keys(updates).length) {
@@ -70,7 +85,7 @@ export default function SettingsPage() {
     try {
       const updated = await request<Settings>("/admin/settings", {
         method: "PUT",
-        body:   JSON.stringify(updates),
+        body:   JSON.stringify(updates as Record<string, number>),
       });
       mutate(updated, false);
       setPrices({});
@@ -133,6 +148,45 @@ export default function SettingsPage() {
                   className="flex-1 bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 transition-all"
                 />
                 <span className="flex items-center text-sm text-white/30 pr-1">₮</span>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Limit section */}
+        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3 text-xs text-blue-400/80 mt-2">
+          ◈ Сарын хүсэлтийн хязгаар — хэрэглэгч тухайн сард хийж болох шинжилгээний тоо
+        </div>
+
+        {LIMIT_PACKAGES.map((pkg) => {
+          const current = data?.[pkg.key];
+          return (
+            <div key={pkg.key} className={CARD}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className={`text-xl ${pkg.color}`}>◈</span>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{pkg.plan} хязгаар</p>
+                    <p className="text-xs text-white/30 mt-0.5">Сарын хүсэлтийн дээд тоо</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-white/30 mb-1">Одоогийн</p>
+                  {isLoading
+                    ? <div className="h-7 w-16 bg-white/10 rounded animate-pulse" />
+                    : <p className="text-xl font-bold text-white">{current ?? "—"} <span className="text-sm font-normal text-white/30">хүсэлт</span></p>
+                  }
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <input
+                  type="number" min={1} max={100} step={1}
+                  value={prices[pkg.key] ?? ""}
+                  onChange={(e) => { setPrices((p) => ({ ...p, [pkg.key]: e.target.value })); setMsg(null); }}
+                  placeholder={current?.toString() ?? "Шинэ хязгаар"}
+                  className="flex-1 bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 transition-all"
+                />
+                <span className="flex items-center text-sm text-white/30 pr-1">хүсэлт</span>
               </div>
             </div>
           );
